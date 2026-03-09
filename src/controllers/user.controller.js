@@ -117,11 +117,15 @@ export const updateUser = asyncHandler(async (req, res) => {
 
 // 1. Controller: Yahan sirf wohi fields mangwayein jo dono roles ke liye common hain
 export const getUsers = asyncHandler(async (req, res) => {
-    const users = await User.find()
-        .populate("bootcampId", "name status startDate endDate")
-        // Yahan se 'mentorId' hata diya taake wo fetch hi na ho
-        .populate("domain", "name description") 
-        .lean(); 
+  const users = await User.find()
+    .populate("bootcampId", "name status")
+    .populate({
+        path: "domain",
+        select: "name description mentorId",
+        // Sirf tab populate karein agar user student ho
+        match: { role: { $ne: "mentor" } } 
+    })
+    .lean();
 
     const sanitizedUsers = users.map(user => sanitizeUser(user));
     
