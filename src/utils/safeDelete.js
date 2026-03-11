@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import os from "os";
 
 export const safeDeleteFile = async (filePath) => {
   try {
@@ -12,8 +13,13 @@ export const safeDeleteFile = async (filePath) => {
 
     // Prevent path traversal
     const projectRoot = process.cwd();
-    if (!normalizedPath.startsWith(projectRoot)) {
-      console.warn("⚠️ Attempt to delete file outside project root:", normalizedPath);
+    const systemTempDir = os.tmpdir();
+
+    const isInProject = normalizedPath.startsWith(projectRoot);
+    const isInTemp = normalizedPath.startsWith(systemTempDir);
+
+    if (!isInProject && !isInTemp) {
+      console.warn("⚠️ Attempt to delete file outside allowed paths:", normalizedPath);
       return;
     }
 

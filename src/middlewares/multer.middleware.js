@@ -1,12 +1,29 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import os from "os";
 
-const tempDir = path.join(process.cwd(), "Public", "Temp");
+// Helper to determine the temp base directory
+const getTempDir = () => {
+  // On Vercel, we MUST use /tmp
+  if (process.env.VERCEL) {
+    return os.tmpdir();
+  }
+  
+  // Local development: use Public/Temp, but fallback to os.tmpdir() if it fails
+  const localTemp = path.join(process.cwd(), "Public", "Temp");
+  try {
+    if (!fs.existsSync(localTemp)) {
+      fs.mkdirSync(localTemp, { recursive: true });
+    }
+    return localTemp;
+  } catch (err) {
+    console.warn("⚠️ Could not create Public/Temp, falling back to system temp:", err.message);
+    return os.tmpdir();
+  }
+};
 
-if (!fs.existsSync(tempDir)) {
-  fs.mkdirSync(tempDir, { recursive: true });
-}
+const tempDir = getTempDir();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
