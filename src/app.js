@@ -24,6 +24,7 @@ import mentorSubmissionRoute from "./routes/mentor/submission.route.js";
 import internDailyProgressRoute from "./routes/intern/dailyProgress.route.js";
 import internDashboardRoute from "./routes/intern/dashboard.route.js";
 import internSubmissionRoute from "./routes/intern/submission.route.js";
+import cronRoute from "./routes/cron.route.js";
 
 export const app = express();
 
@@ -77,6 +78,7 @@ app.use("/api/v1/mentor/bootcamp/dashboard", mentorDashboardRoute);
 app.use("/api/v1/mentor/bootcamp/domains", mentorDomainRoute);
 app.use("/api/v1/mentor/bootcamp/assignments", mentorAssignmentRoute);
 app.use("/api/v1/mentor/bootcamp/submissions", mentorSubmissionRoute);
+app.use("/api/v1/cron", cronRoute);
 
 
 app.get("/", (req, res) => {

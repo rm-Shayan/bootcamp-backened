@@ -6,7 +6,7 @@ const EMAIL_CRON_SCHEDULE = process.env.EMAIL_CRON_SCHEDULE || "* * * * *";
 
 console.log("[cron:email] initializing with schedule:", EMAIL_CRON_SCHEDULE);
 
-const sendEmailsToPendingUsers = async () => {
+export const sendEmailsToPendingUsers = async () => {
   try {
     const users = await User.find({ isMailSend: false, active: true });
 
@@ -39,19 +39,24 @@ const sendEmailsToPendingUsers = async () => {
       })
     );
     console.log("[cron:email] job finished", results);
+    return results; // Return results for the API response
   } catch (err) {
     console.error("[cron:email] cron job error", err);
+    throw err; // Throw for the API handler to catch
   }
 };
 
-cron.schedule(
-  EMAIL_CRON_SCHEDULE,
-  () => {
-    console.log("[cron:email] running scheduled job", new Date().toISOString());
-    sendEmailsToPendingUsers();
-  },
-  {
-    scheduled: true,
-    timezone: process.env.EMAIL_CRON_TZ || "UTC",
-  }
-);
+// Only schedule node-cron if not on Vercel
+if (process.env.NODE_ENV !== "production") {
+  cron.schedule(
+    EMAIL_CRON_SCHEDULE,
+    () => {
+      console.log("[cron:email] running scheduled job", new Date().toISOString());
+      sendEmailsToPendingUsers();
+    },
+    {
+      scheduled: true,
+      timezone: process.env.EMAIL_CRON_TZ || "UTC",
+    }
+  );
+}
